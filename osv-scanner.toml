@@ -1,0 +1,141 @@
+# osv-scanner findings that cannot be fixed in this repository today.
+#
+# osv-scanner only auto-loads an osv-scanner.toml sitting next to a lockfile, so
+# this single root file is applied to every lockfile through the explicit flag:
+#   mise run vuln   (osv-scanner scan source --recursive --allow-no-lockfiles
+#                    --config osv-scanner.toml .)
+#
+# All 24 entries are in DEV dependency trees of the two applications and arrive
+# through transitive pins their owners control:
+#   - api: 23 advisories under @nestjs/mau@0.2.9 (the Hexlet deploy CLI):
+#       21 x undici@6.20.1 (exact pin by mau) and 2 x tmp@0.0.33
+#         (mau -> inquirer 8.2.6 -> external-editor)
+#   - client: 1 advisory, minimatch@10.2.6 (eslint-config-next ->
+#       typescript-eslint chain; fix is a minimatch 11 major bump)
+#
+# Policy: every entry carries an effectiveUntil review date. When it passes,
+# osv-scanner reports the finding again and `mise run vuln` fails, forcing a
+# fresh decision: bump, override, or re-review. Entries must shrink, not grow.
+#
+# Regenerate the ID list with:
+#   mise exec -- osv-scanner scan source --recursive --allow-no-lockfiles --format json .
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+reason = "dev-tree only (eslint tooling: eslint-config-next -> typescript-eslint -> typescript-estree); the fix is minimatch 11, a major bump - take it with the next typescript-eslint upgrade"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-52f5-9888-hmc6"
+reason = "dev-tree only: @nestjs/mau@0.2.9 -> inquirer 8.2.6 -> external-editor pins tmp at 0.0.33; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-ph9p-34f9-6g65"
+reason = "dev-tree only: @nestjs/mau@0.2.9 -> inquirer 8.2.6 -> external-editor pins tmp at 0.0.33; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-2m5v-pch6-74hx"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-2mjp-6q6p-2qxm"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-35p6-xmwp-9g52"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-4992-7rv2-5pvq"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-4qv8-2p9j-2685"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-8xcm-r25x-g524"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-9fm3-97px-rjf6"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-c76h-2ccp-4975"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-cxrh-j4jr-qwg3"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-f269-vfmq-vjvj"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-g8m3-5g58-fq7m"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-g9mf-h72j-4rw9"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-m8rv-5g2x-5cg5"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-p88m-4jfj-68fv"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-qrxm-fqhp-jwvm"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-r53p-7pc4-xj5r"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-rfgv-xxqx-mfg5"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-v3r7-h72x-cjcm"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-v9p9-hfj2-hcw8"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-vrm6-8vpv-qv8q"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
+
+[[IgnoredVulns]]
+id = "GHSA-vxpw-j846-p89q"
+reason = "dev-tree only: @nestjs/mau@0.2.9 (Hexlet deploy CLI, `npm run deploy`) pins undici at exactly 6.20.1; a fix needs a newer mau release or an npm override the app owner must approve"
+effectiveUntil = 2027-02-14
