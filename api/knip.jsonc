@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@6.45.1/schema.json",
+  "entry": ["src/main.ts"],
+  "project": ["src/**/*.ts", "test/**/*.ts", "vitest.config*.ts"],
+  // Dependencies kept on purpose that static analysis cannot see being used:
+  // - @nestjs/mau powers `npm run deploy` (nest deploy); knip does not know that script
+  // - @types/express types the Express adapter of @nestjs/platform-express for future handlers
+  // - source-map-support comes from the Nest scaffold for readable production stack traces
+  "ignoreDependencies": ["@nestjs/mau", "@types/express", "source-map-support"]
+}
