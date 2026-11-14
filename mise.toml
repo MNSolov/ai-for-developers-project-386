@@ -1,0 +1,28 @@
+[tools]
+node = "26"
+hk = "2.12.0"
+jactionlint = "2.6.0"
+betterleaks = "1.10.1"
+osv-scanner = "2.7.1"
+typos = "1.52.2"
+# shellcheck is invoked by jactionlint for the `run:` steps in workflows;
+# GitHub runners ship it, mise keeps the local run identical.
+shellcheck = "0.11.0"
+# not in the mise registry yet; installed straight from GitHub releases
+"ubi:agent-sh/agnix" = "0.61.0"
+
+[env]
+# root-level npm tools (commitlint) on PATH for mise-spawned processes
+_.path = ["node_modules/.bin"]
+
+[tasks.check]
+description = "run every repository check (the same command CI runs)"
+run = "hk check --all"
+
+[tasks.vuln]
+description = "scan lockfiles against the OSV vulnerability database (needs network)"
+run = "osv-scanner scan source --recursive --allow-no-lockfiles --config osv-scanner.toml ."
+
+[tasks.fix]
+description = "apply safe autofixes (formatters, linter --fix)"
+run = "hk fix"
