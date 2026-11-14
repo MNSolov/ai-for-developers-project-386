@@ -1,0 +1,11 @@
+# build output
+.next/
+out/
+build/
+
+# generated
+next-env.d.ts
+package-lock.json
+
+# dependencies (ignored by prettier by default, listed for clarity)
+node_modules/
