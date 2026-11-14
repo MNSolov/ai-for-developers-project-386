@@ -1,0 +1,81 @@
+# The repository's single quality gate. It mirrors the local `mise run check`
+# (secrets, typos, workflow lint, app lint/format, typecheck, knip, depcruise,
+# unit tests, agent-rules quality) and adds what must not or cannot run in git
+# hooks: the api e2e suite (profile "ci") and the network-dependent
+# osv-scanner vulnerability scan.
+#
+# Runs on every push to main, every pull request, weekly on schedule (so
+# dependency drift and new vulnerabilities surface even without activity),
+# and manually via workflow_dispatch.
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Mondays, 06:23 UTC — deliberately off the top of the hour.
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+# Least privilege by default; the single job re-adds exactly what it needs.
+permissions: {}
+
+# A newer run of the same branch or PR replaces the older one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: quality gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history: commitlint validates the whole PR commit range.
+          # No git credential needs to outlive this step.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install the pinned toolchain (mise)
+        uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          # Pin mise itself to the version this repository was verified with.
+          version: 2026.11.7
+
+      - name: Install root tooling (commitlint)
+        run: npm ci
+
+      # api/ and client/ are self-contained apps that join this repository
+      # separately. Install them only when they are present in the commit
+      # being checked; every hk step touching them likewise skips when their
+      # files are absent.
+      - name: Install api dependencies
+        if: hashFiles('api/package.json') != ''
+        working-directory: api
+        run: npm ci
+
+      - name: Install client dependencies
+        if: hashFiles('client/package.json') != ''
+        working-directory: client
+        run: npm ci
+
+      - name: Validate PR commit messages (Conventional Commits)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: npx --no-install commitlint --from "origin/$BASE_REF" --to HEAD
+
+      - name: Run quality gates (hk check --all)
+        env:
+          # Only in CI: also run the api e2e suite.
+          HK_PROFILE: ci
+        run: mise run check
+
+      - name: Scan dependencies for known vulnerabilities (osv-scanner)
+        run: mise run vuln
