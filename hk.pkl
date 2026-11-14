@@ -1,0 +1,166 @@
+/// Quality gates for this repository, wired into hk (https://hk.jdx.dev).
+///
+/// Tiers:
+/// - pre-commit / fix: fast checks over the selected (staged) files, with autofix
+///   — secrets, typos, workflow lint, app lint and format.
+/// - check / pre-push: whole-project checks per app — typecheck, unused-code and
+///   dependency hygiene (knip), architecture rules (depcruise), unit tests — plus
+///   agent-rules quality (agnix) over the repository.
+/// - commit-msg: Conventional Commits, enforced by commitlint.
+/// - api e2e runs only in CI, behind profile "ci" (HK_PROFILE=ci or --profile ci).
+///
+/// Vulnerability scanning (osv-scanner) is a separate `mise run vuln` task: it
+/// needs network access, which git hooks must not depend on.
+///
+/// The slow steps declare no {{files}} and a broad glob: the glob only decides
+/// whether the step is triggered at all (any file of that app is in the hook's
+/// selection), and the command then runs over the whole app. On a clone that does
+/// not contain `api/` or `client/` yet, nothing under those directories can be
+/// selected, so the steps skip instead of failing on a missing directory.
+amends "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.12.0/hk@2.12.0#/Builtins.pkl"
+
+min_hk_version = "2.12.0"
+
+// The step skipped outside CI (api e2e, profile "ci") is expected behavior, so
+// quiet the reminder that it was skipped for a missing profile.
+hide_warnings = List("missing-profiles")
+
+// Fast, fix-capable steps shared by the pre-commit and fix hooks. They receive
+// the hook's selected files as arguments, so they stay quick.
+local fastSteps = new Mapping<String, Step> {
+  // Check-only by design: a found secret must always block, never auto-edit.
+  ["betterleaks"] = Builtins.betterleaks
+  ["typos"] = Builtins.typos
+  // Check-only on purpose: `jactionlint --fix` (the builtin's fix) rewrites
+  // workflow files, which must never happen to the generated
+  // .github/workflows/hexlet-check.yml. jactionlint itself already exempts that
+  // generated Hexlet file from its policy rules, so no baseline is needed.
+  ["jactionlint"] {
+    glob = List(".github/workflows/*.yml", ".github/workflows/*.yaml", ".github/dependabot.yml", ".github/dependabot.yaml")
+    check = "jactionlint --format gcc {{files}}"
+    diagnostic_format = "gcc"
+    batch = true
+  }
+  // File sets mirror each app's own lint/format scripts; commands run inside the
+  // app directory, so {{files}} are paths relative to it.
+  ["api-oxlint"] {
+    dir = "api"
+    glob = List("src/**/*.ts", "test/**/*.ts")
+    check = "npm exec -- oxlint --type-aware --deny-warnings {{files}}"
+    fix = "npm exec -- oxlint --type-aware --deny-warnings --fix {{files}}"
+  }
+  ["api-prettier"] {
+    dir = "api"
+    glob = List("src/**/*.ts", "test/**/*.ts")
+    check = "npm exec -- prettier --check {{files}}"
+    fix = "npm exec -- prettier --write {{files}}"
+  }
+  ["client-eslint"] {
+    dir = "client"
+    glob = List("**/*.{js,mjs,cjs,ts,tsx,jsx}")
+    // Mirrors the globalIgnores of client/eslint.config.mjs plus files ESLint
+    // cannot lint; .next/ is gitignored and never selected in the first place.
+    exclude = List(".next/**", "out/**", "build/**", "next-env.d.ts", "package-lock.json")
+    check = "npm exec -- eslint {{files}}"
+    fix = "npm exec -- eslint --fix {{files}}"
+    diagnostic_format = "stylish"
+  }
+  ["client-prettier"] {
+    dir = "client"
+    // prettier itself applies client/.prettierignore; these excludes only keep
+    // hk's file plan honest about what will actually be checked.
+    glob = List("**/*.{js,mjs,cjs,ts,tsx,jsx,css,json,yaml,yml,md}")
+    exclude = List(".next/**", "out/**", "build/**", "next-env.d.ts", "package-lock.json")
+    check = "npm exec -- prettier --check {{files}}"
+    fix = "npm exec -- prettier --write {{files}}"
+  }
+}
+
+// Whole-project steps shared by the check and pre-push hooks. No {{files}} in
+// the commands: each runs over its whole app whenever the app is part of the
+// hook's selection.
+local slowSteps = new Mapping<String, Step> {
+  ["api-typecheck"] {
+    dir = "api"
+    glob = "**"
+    check = "npm run typecheck"
+  }
+  ["api-knip"] {
+    dir = "api"
+    glob = "**"
+    check = "npm run knip"
+  }
+  ["api-depcruise"] {
+    dir = "api"
+    glob = "**"
+    check = "npm run depcruise"
+  }
+  ["api-test"] {
+    dir = "api"
+    glob = "**"
+    check = "npm test"
+  }
+  ["client-typecheck"] {
+    dir = "client"
+    glob = "**"
+    check = "npm run typecheck"
+  }
+  ["client-knip"] {
+    dir = "client"
+    glob = "**"
+    check = "npm run knip"
+  }
+  ["client-depcruise"] {
+    dir = "client"
+    glob = "**"
+    check = "npm run depcruise"
+  }
+  // Agent-rules quality over the whole repository (AGENTS.md files).
+  ["agnix"] {
+    glob = "**/AGENTS.md"
+    check = "agnix ."
+  }
+}
+
+hooks {
+  // Staged files only; fixes are applied, staged, and unstaged work is stashed
+  // and restored around the run.
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps = fastSteps
+  }
+  // `hk fix` / `mise run fix`: the same fast set, applied without staging.
+  ["fix"] {
+    steps = fastSteps
+  }
+  // `hk check --all` / `mise run check`: the full local gate. With
+  // HK_PROFILE=ci (what CI sets) it additionally runs the api e2e suite.
+  ["check"] {
+    steps {
+      ...fastSteps
+      ...slowSteps
+      ["api-e2e"] {
+        dir = "api"
+        glob = "**"
+        profiles = List("ci")
+        check = "npm run test:e2e"
+      }
+    }
+  }
+  // Everything CI runs except e2e, before the push leaves the machine.
+  ["pre-push"] {
+    steps {
+      ...fastSteps
+      ...slowSteps
+    }
+  }
+  ["commit-msg"] {
+    steps {
+      ["commitlint"] {
+        check = "npx --no-install commitlint --edit {{commit_msg_file}}"
+      }
+    }
+  }
+}
