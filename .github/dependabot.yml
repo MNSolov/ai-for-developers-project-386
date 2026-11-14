@@ -1,0 +1,37 @@
+# Dependabot keeps the pinned GitHub Actions and every npm lockfile in this
+# monorepo (root tooling, api/, client/) up to date. All entries are weekly
+# with a 7-day cooldown, so a dismissed or reverted update is not reopened
+# immediately.
+#
+# The /api and /client entries stay inactive until those directories are
+# pushed to GitHub: Dependabot logs an error for them in the meantime, which
+# is expected and stops on its own once the apps land in the repository.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: npm
+    directory: /api
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: npm
+    directory: /client
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
