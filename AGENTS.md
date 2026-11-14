@@ -1,11 +1,11 @@
 # AGENTS.md
 
-Rules for working in this repository. The two apps carry their own rules — read `api/AGENTS.md` before touching the NestJS API and `client/AGENTS.md` before touching the Next.js client. This file applies to everything, including the root tooling.
+Rules for working in this repository — a booking service in two apps: the NestJS API in `api/` and the Next.js client in `client/`. The apps carry their own rules — read `api/AGENTS.md` before touching the API and `client/AGENTS.md` before touching the client. This file applies to everything, including the root tooling.
 
 ## First run on a fresh clone
 
 1. `mise install` — installs the pinned toolchain from `mise.toml`: node, hk, jactionlint, betterleaks, osv-scanner, typos, shellcheck, agnix.
-2. `npm install` in the repo root, then in `api/` and `client/` — each of the three is a self-contained npm project.
+2. `npm install` in the repo root, then in `api/` and `client/` — each of the three is a self-contained npm project. The two apps join this repository separately, so a given commit may contain either, both, or neither: the gates below install and check them only when their files are present, and skip otherwise.
 3. `hk install --mise` — registers this repository's git hooks through mise.
 
 Run tools through mise (`mise run <task>`, `mise exec -- <cmd>`) so the pinned Node is used, not whatever the shell has on PATH.
@@ -21,9 +21,11 @@ Run tools through mise (`mise run <task>`, `mise exec -- <cmd>`) so the pinned N
 
 `mise run fix` applies the safe autofixes (formatters, linter `--fix`) — run it before committing. `mise run vuln` scans every lockfile against the OSV vulnerability database; it needs network access, so it is a separate task that CI runs on every push, every pull request, and weekly.
 
-The api e2e suite (`npm run test:e2e` in `api/`) is a CI-only tier (hk profile `ci`): run it manually whenever you change request handling, auth, or persistence.
+The api e2e suite (`npm run test:e2e` in `api/`) and the launch smoke suites (`npm run test:smoke` in both `api/` and `client/`) are CI-only tiers (hk profile `ci`): the smoke suites build the production artifact, boot it on an ephemeral port (`node dist/main` for the api, `next start` for the client), and require the first HTTP request to be answered. Run them manually whenever you change request handling, auth, persistence, or anything on the startup path (bootstrap, build configuration, launch wiring).
 
-Git hooks: `pre-commit` runs the fast checks with autofix on staged files, `pre-push` re-runs everything except e2e, `commit-msg` validates the message.
+In `api/`, the three test tiers are split by filename and vitest config: unit `*.spec.ts` (default config), e2e `*.e2e-spec.ts` (`vitest.config.e2e.ts`), launch smoke `*.smoke-spec.ts` (`vitest.config.smoke.ts`). To run one suite directly, pass the matching `--config` — e.g. `npx vitest run --config ./vitest.config.e2e.ts test/app.e2e-spec.ts` — otherwise vitest finds no tests. The smoke config also expects `npm run build` to have run (`npm run test:smoke` does both).
+
+Git hooks: `pre-commit` runs the fast checks with autofix on staged files, `pre-push` re-runs everything except the e2e and launch-smoke suites, `commit-msg` validates the message.
 
 ## Commit messages
 

@@ -7,7 +7,9 @@
 ///   dependency hygiene (knip), architecture rules (depcruise), unit tests — plus
 ///   agent-rules quality (agnix) over the repository.
 /// - commit-msg: Conventional Commits, enforced by commitlint.
-/// - api e2e runs only in CI, behind profile "ci" (HK_PROFILE=ci or --profile ci).
+/// - api e2e and both apps' launch smoke suites (build the production
+///   artifact, boot it, answer one HTTP request) run only in CI, behind
+///   profile "ci" (HK_PROFILE=ci or --profile ci).
 ///
 /// Vulnerability scanning (osv-scanner) is a separate `mise run vuln` task: it
 /// needs network access, which git hooks must not depend on.
@@ -136,7 +138,8 @@ hooks {
     steps = fastSteps
   }
   // `hk check --all` / `mise run check`: the full local gate. With
-  // HK_PROFILE=ci (what CI sets) it additionally runs the api e2e suite.
+  // HK_PROFILE=ci (what CI sets) it additionally runs the api e2e suite and
+  // both apps' launch smoke suites.
   ["check"] {
     steps {
       ...fastSteps
@@ -147,9 +150,22 @@ hooks {
         profiles = List("ci")
         check = "npm run test:e2e"
       }
+      ["api-smoke"] {
+        dir = "api"
+        glob = "**"
+        profiles = List("ci")
+        check = "npm run test:smoke"
+      }
+      ["client-smoke"] {
+        dir = "client"
+        glob = "**"
+        profiles = List("ci")
+        check = "npm run test:smoke"
+      }
     }
   }
-  // Everything CI runs except e2e, before the push leaves the machine.
+  // Everything CI runs except the e2e and launch-smoke suites, before the push
+  // leaves the machine.
   ["pre-push"] {
     steps {
       ...fastSteps
