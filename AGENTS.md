@@ -10,6 +10,12 @@ Rules for working in this repository — a booking service in two apps: the Nest
 
 Run tools through mise (`mise run <task>`, `mise exec -- <cmd>`) so the pinned Node is used, not whatever the shell has on PATH.
 
+## Workflow
+
+Product work runs as a pipeline of user-invoked skills: `grill-with-docs` (decisions plus domain docs) → `to-tickets` (tracer-bullet tickets in GitHub Issues, labelled `ready-for-agent`) → `implement` (tdd at pre-agreed seams, ends with the `code-review` skill) → `pr`. These skills may be absent from the available-skills list: when the user names a skill that is not listed, read `~/.config/opencode/skills/<name>/SKILL.md` and follow it as named instead of substituting a similar one.
+
+Branches are cut from `main` as `<issue-number>-<slug>`. Delivery is a pull request into `main`, merged by rebase with the branch deleted. The agent opens the PR and stops at green CI: merging is the user's call, never the agent's.
+
 ## The quality gate
 
 `mise run check` must exit 0 before any change counts as done. It runs the same gates as CI:
