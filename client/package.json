@@ -9,7 +9,7 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "knip": "knip",
     "depcruise": "dependency-cruiser app",
     "test:smoke": "npm run build && node scripts/smoke.mjs"
