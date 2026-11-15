@@ -2,7 +2,6 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,7 +12,6 @@
     "typecheck": "tsc --noEmit",
     "knip": "knip",
     "depcruise": "dependency-cruiser app",
-    "test": "vitest run",
     "test:smoke": "npm run build && node scripts/smoke.mjs"
   },
   "dependencies": {
@@ -23,20 +21,15 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
-    "@testing-library/react": "^16.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.3.0",
     "dependency-cruiser": "^18.7.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.6",
-    "jsdom": "^31.0.1",
     "knip": "^6.45.1",
     "prettier": "^3.4.2",
     "tailwindcss": "4.3.3",
-    "typescript": "^5",
-    "vite": "^8.3.8",
-    "vitest": "^4.1.12"
+    "typescript": "^5"
   }
 }

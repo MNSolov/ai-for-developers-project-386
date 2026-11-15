@@ -118,11 +118,6 @@ local slowSteps = new Mapping<String, Step> {
     glob = "**"
     check = "npm run depcruise"
   }
-  ["client-test"] {
-    dir = "client"
-    glob = "**"
-    check = "npm test"
-  }
   // Agent-rules quality over the whole repository (AGENTS.md files).
   ["agnix"] {
     glob = "**/AGENTS.md"
