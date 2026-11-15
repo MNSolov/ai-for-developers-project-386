@@ -45,3 +45,17 @@ Conventional Commits, enforced by commitlint on every commit and over the whole 
   - `osv-scanner.toml` — known vulnerabilities confined to dev-only dependency trees, each with a reason and an expiry (`effectiveUntil`). Do not extend, renew, or add entries without a human decision — fix or upgrade the dependency instead, and remove the entry in the same change.
   - `api/knip.jsonc` — `ignoreDependencies` for packages knip cannot see being used.
 - When an ignored finding can be fixed or dropped, remove its entry as part of that change.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues, managed through the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles use their default label strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and one `docs/adr/` at the repo root. See `docs/agents/domain.md`.
