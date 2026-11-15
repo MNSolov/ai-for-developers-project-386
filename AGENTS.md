@@ -54,6 +54,10 @@ Conventional Commits, enforced by commitlint on every commit and over the whole 
 
 ## Agent skills
 
+### Named skills
+
+When the user names a skill that is not in the available-skills list, read `~/.config/opencode/skills/<name>/SKILL.md` and follow it as named instead of substituting a similar one.
+
 ### Issue tracker
 
 Issues live in GitHub Issues, managed through the `gh` CLI. See `docs/agents/issue-tracker.md`.
