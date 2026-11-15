@@ -12,7 +12,7 @@
     "format:check": "prettier --check .",
     "typecheck": "next typegen && tsc --noEmit",
     "knip": "knip",
-    "depcruise": "dependency-cruiser app",
+    "depcruise": "dependency-cruiser app src",
     "test": "vitest run",
     "test:smoke": "npm run build && node scripts/smoke.mjs"
   },
