@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import Home from "./page";
+import Home from "./index";
 
 // Tracer spec for the client's unit-test tier (issue #15): it pins the
 // scaffold's observable behavior and proves the vitest + Testing Library
